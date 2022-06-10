@@ -18,12 +18,14 @@ const cardSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
-  likes: [{
-    type: mongoose.Schema.Types.ObjectId,
-    default: [],
-  }]
+  likes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      default: [],
+    },
+  ],
 });
 
 const cardModel = mongoose.model('card', cardSchema);

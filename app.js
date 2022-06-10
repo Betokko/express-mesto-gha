@@ -18,6 +18,9 @@ app.use((req, res, next) => {
 });
 app.use('/', userRouter);
 app.use('/', cardRouter);
+app.use('*', (req, res) => {
+  res.send({message: 'Page Not Found'})
+})
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 

@@ -17,8 +17,13 @@ const cardSchema = new mongoose.Schema({
     required: true,
   },
   createdAt: {
-    date: { type: Date, default: Date.now },
+    type: Date,
+    default: Date.now
   },
+  likes: [{
+    type: mongoose.Schema.Types.ObjectId,
+    default: [],
+  }]
 });
 
 const cardModel = mongoose.model('card', cardSchema);

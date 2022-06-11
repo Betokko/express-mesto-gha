@@ -32,7 +32,7 @@ const getUser = (req, res) => {
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
-    .then((user) => res.send(user))
+    .then((user) => res.status(201).send(user))
     .catch((err) => handleError(err, res));
 };
 
@@ -42,7 +42,7 @@ const updateUser = (req, res) => {
     req.user._id,
     { name, about },
     { new: true },
-    { runValidators: true }
+    { runValidators: true },
   )
     .then((user) => {
       if (!user) throw new Error('Пользователь не найден');
@@ -57,7 +57,7 @@ const updateUserAvatar = (req, res) => {
     req.user._id,
     { avatar },
     { new: true },
-    { runValidators: true }
+    { runValidators: true },
   )
     .then((user) => {
       if (!user) throw new Error('Пользователь не найден');

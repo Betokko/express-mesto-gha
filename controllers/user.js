@@ -18,30 +18,38 @@ const getUser = (req, res) => {
     .catch((err) => handleError(err, res));
 };
 
+const getUserInfo = (req, res) => {
+  User.find({})
+    .then((users) => res.send(users))
+    .catch((err) => handleError(err, res));
+};
+
 const createUser = (req, res) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
   if (!password || !email) {
-    return res.status(400).send({ message: 'Email или password не могут быть пустыми!' });
+    return res
+      .status(400)
+      .send({ message: 'Email или password не могут быть пустыми!' });
   }
-  return User.findOne({ email })
-    .then((user) => {
-      if (user) {
-        res.status(403).send({ message: 'Такой пользлватель уже существует' });
-      } else {
-        bcrypt.hash(password, 10)
-          .then((hash) => User.create({
-            name,
-            about,
-            avatar,
-            email,
-            password: hash,
-          }))
-          .then((response) => res.status(201).send(response))
-          .catch((err) => handleError(err, res));
-      }
-    });
+  return User.findOne({ email }).then((user) => {
+    if (user) {
+      res.status(403).send({ message: 'Такой пользлватель уже существует' });
+    } else {
+      bcrypt
+        .hash(password, 10)
+        .then((hash) => User.create({
+          name,
+          about,
+          avatar,
+          email,
+          password: hash,
+        }))
+        .then((response) => res.status(201).send(response))
+        .catch((err) => handleError(err, res));
+    }
+  });
 };
 
 const updateUser = (req, res) => {
@@ -77,6 +85,7 @@ const updateUserAvatar = (req, res) => {
 module.exports = {
   getUsers,
   getUser,
+  getUserInfo,
   createUser,
   updateUser,
   updateUserAvatar,

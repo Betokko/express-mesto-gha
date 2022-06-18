@@ -1,41 +1,40 @@
 const bcrypt = require('bcrypt');
 
 const User = require('../models/user');
-const { handleError } = require('../utils/handlers');
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch((err) => handleError(err, res));
+    .catch(next);
 };
 
-const getUser = (req, res) => {
+const getUser = (req, res, next) => {
   User.findById(req.params.id)
     .then((user) => {
-      if (!user) throw new Error('Пользователь не найден');
+      if (!user) {
+        next(new Error('Пользователь не найден'));
+      }
       res.send(user);
     })
-    .catch((err) => handleError(err, res));
+    .catch(next);
 };
 
-const getUserInfo = (req, res) => {
+const getUserInfo = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch((err) => handleError(err, res));
+    .catch(next);
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
   if (!password || !email) {
-    return res
-      .status(400)
-      .send({ message: 'Email или password не могут быть пустыми!' });
+    next(new Error('Email или password не могут быть пустыми!'));
   }
   return User.findOne({ email }).then((user) => {
     if (user) {
-      res.status(403).send({ message: 'Такой пользлватель уже существует' });
+      next(new Error('Такой пользователь уже существует'));
     } else {
       bcrypt
         .hash(password, 10)
@@ -47,12 +46,12 @@ const createUser = (req, res) => {
           password: hash,
         }))
         .then((response) => res.status(201).send(response))
-        .catch((err) => handleError(err, res));
+        .catch(next);
     }
   });
 };
 
-const updateUser = (req, res) => {
+const updateUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -61,13 +60,15 @@ const updateUser = (req, res) => {
     { runValidators: true },
   )
     .then((user) => {
-      if (!user) throw new Error('Пользователь не найден');
+      if (!user) {
+        next(new Error('Пользователь не найден'));
+      }
       res.send(user);
     })
-    .catch((err) => handleError(err, res));
+    .catch(next);
 };
 
-const updateUserAvatar = (req, res) => {
+const updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -76,10 +77,12 @@ const updateUserAvatar = (req, res) => {
     { runValidators: true },
   )
     .then((user) => {
-      if (!user) throw new Error('Пользователь не найден');
+      if (!user) {
+        next(new Error('Пользователь не найден'));
+      }
       res.send(user);
     })
-    .catch((err) => handleError(err, res));
+    .catch(next);
 };
 
 module.exports = {

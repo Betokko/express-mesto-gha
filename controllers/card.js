@@ -14,21 +14,23 @@ const createCard = (req, res, next) => {
 };
 
 const deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .then((card) => {
-      if (!card) {
-        next(new Error('Карточка не найдена'));
-      }
-      res.send(card);
-    })
-    .catch(next);
+  if (req.user._id === req.params.cardId) {
+    Card.findByIdAndRemove(req.params.cardId)
+      .then((card) => {
+        if (!card) {
+          next(new Error('Карточка не найдена'));
+        }
+        res.send(card);
+      })
+      .catch(next);
+  }
 };
 
 const addLikeOnCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
-    { new: true },
+    { new: true }
   )
     .then((card) => {
       if (!card) {
@@ -43,7 +45,7 @@ const removeLikeOnCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
-    { new: true },
+    { new: true }
   )
     .then((card) => {
       if (!card) {

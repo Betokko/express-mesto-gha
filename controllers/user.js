@@ -32,6 +32,10 @@ const createUser = (req, res, next) => {
   if (!password || !email) {
     next(new Error('Email или password не могут быть пустыми!'));
   }
+  const regex = /https?:\/\/[\w\W]+/g;
+  if (regex.test(avatar)) {
+    next(new Error('Некоректная ссылка'));
+  }
   return User.findOne({ email }).then((user) => {
     if (user) {
       next(new Error('Такой пользователь уже существует'));

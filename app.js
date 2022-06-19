@@ -5,6 +5,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const { errors } = require('celebrate');
 
 const userRouter = require('./routes/user');
 const cardRouter = require('./routes/card');
@@ -27,6 +28,7 @@ app.use('/cards', cardRouter);
 app.use('*', (req, res) => {
   res.status(404).send({ message: 'Page not found' });
 });
+app.use(errors());
 app.use(errorHandler);
 
 mongoose.connect('mongodb://localhost:27017/mestodb');

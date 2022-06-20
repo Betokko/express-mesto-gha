@@ -23,6 +23,8 @@ app.use(cookieParser());
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
+    about: Joi.string().min(2).max(30),
+    avatar: Joi.string().pattern((/https?:\/\/[\w\W]+/)),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),

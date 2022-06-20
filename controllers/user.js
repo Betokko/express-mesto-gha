@@ -52,7 +52,7 @@ const createUser = (req, res, next) => {
           email,
           password: hash,
         }))
-        .then((response) => res.status(201).send(response))
+        .then(() => res.status(201).send({ message: 'Регистрация прошла успешно' }))
         .catch(next);
     }
   });

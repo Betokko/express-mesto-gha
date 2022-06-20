@@ -1,6 +1,9 @@
 const bcrypt = require('bcrypt');
 
 const User = require('../models/user');
+const BadRequestError = require('../error-classes/BadRequestError');
+const NotFoundError = require('../error-classes/NotFoundError');
+const ConflictError = require('../error-classes/ConflictError');
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -12,7 +15,7 @@ const getUser = (req, res, next) => {
   User.findById(req.params.id)
     .then((user) => {
       if (!user) {
-        next(new Error('Пользователь не найден'));
+        next(new NotFoundError('Пользователь не найден'));
       }
       res.send(user);
     })
@@ -30,15 +33,15 @@ const createUser = (req, res, next) => {
     name, about, avatar, email, password,
   } = req.body;
   if (!password || !email) {
-    next(new Error('Email или password не могут быть пустыми!'));
+    next(new BadRequestError('Email или password не могут быть пустыми!'));
   }
   const regex = /https?:\/\/[\w\W]+/g;
   if (regex.test(avatar)) {
-    next(new Error('Некоректная ссылка'));
+    next(new BadRequestError('Некоректная ссылка'));
   }
   return User.findOne({ email }).then((user) => {
     if (user) {
-      next(new Error('Такой пользователь уже существует'));
+      next(new ConflictError('Такой пользователь уже существует'));
     } else {
       bcrypt
         .hash(password, 10)
@@ -65,7 +68,7 @@ const updateUser = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        next(new Error('Пользователь не найден'));
+        next(new NotFoundError('Пользователь не найден'));
       }
       res.send(user);
     })
@@ -82,7 +85,7 @@ const updateUserAvatar = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        next(new Error('Пользователь не найден'));
+        next(new NotFoundError('Пользователь не найден'));
       }
       res.send(user);
     })

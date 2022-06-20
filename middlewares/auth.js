@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
+const UnauthorizedError = require('../error-classes/UnauthorizedError');
 
 const { PRIVATE_KEY } = process.env;
-const err = new Error('Необходима авторизация');
+const err = new UnauthorizedError('Необходима авторизация');
 
 const auth = (req, res, next) => {
   const { cookies } = req;

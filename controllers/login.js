@@ -1,21 +1,22 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+
 const User = require('../models/user');
+const UnauthorizedError = require('../error-classes/UnauthorizedError');
+const NotFoundError = require('../error-classes/NotFoundError');
 
 const { PRIVATE_KEY } = process.env;
-const incorrectData = new Error('Введен неверный email или password');
-const notFound = new Error('Пользователь с таким email не найден');
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    next(incorrectData);
+    next(new UnauthorizedError('Введен неверный email или password'));
   }
   return User.findOne({ email })
     .select('+password')
     .then((user) => {
       if (!user) {
-        next(notFound);
+        next(new NotFoundError('Пользователь с таким email не найден'));
       } else {
         bcrypt.compare(password, user.password, (err, result) => {
           if (result) {
@@ -28,7 +29,7 @@ const login = (req, res, next) => {
               .status(200)
               .send({ token });
           }
-          next(incorrectData);
+          next(new UnauthorizedError('Введен неверный email или password'));
           return null;
         });
       }

@@ -1,4 +1,6 @@
 const Card = require('../models/card');
+const NotFoundError = require('../error-classes/NotFoundError');
+const ForbiddenError = require('../error-classes/ForbiddenError');
 
 const getCards = (req, res, next) => {
   Card.find({})
@@ -14,16 +16,16 @@ const createCard = (req, res, next) => {
 };
 
 const deleteCard = (req, res, next) => {
-  if (req.user._id === req.params.cardId) {
-    Card.findByIdAndRemove(req.params.cardId)
-      .then((card) => {
-        if (!card) {
-          next(new Error('Карточка не найдена'));
-        }
-        res.send(card);
-      })
-      .catch(next);
-  }
+  Card.findById(req.params.cardId)
+    .orFail(() => new NotFoundError('Карточка не найдена'))
+    .then((card) => {
+      if (!card.owner.equals(req.user._id)) {
+        return next(new ForbiddenError('Нельзя удалить чужую карточку'));
+      }
+      return card
+        .remove()
+        .then(() => res.send({ message: 'Карточка удалена' }));
+    });
 };
 
 const addLikeOnCard = (req, res, next) => {
@@ -34,7 +36,7 @@ const addLikeOnCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        next(new Error('Карточка не найдена'));
+        next(new NotFoundError('Карточка не найдена'));
       }
       res.send(card);
     })
@@ -49,7 +51,7 @@ const removeLikeOnCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        next(new Error('Карточка не найдена'));
+        next(new NotFoundError('Карточка не найдена'));
       }
       res.send(card);
     })

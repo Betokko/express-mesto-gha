@@ -15,15 +15,15 @@ const getUser = (req, res, next) => {
   User.findById(req.params.id)
     .then((user) => {
       if (!user) {
-        next(new NotFoundError('Пользователь не найден'));
+        return next(new NotFoundError('Пользователь не найден'));
       }
-      res.send(user);
+      return res.send(user);
     })
     .catch(next);
 };
 
 const getUserInfo = (req, res, next) => {
-  User.find({})
+  User.findById(req.user._id)
     .then((users) => res.send(users))
     .catch(next);
 };
@@ -34,10 +34,6 @@ const createUser = (req, res, next) => {
   } = req.body;
   if (!password || !email) {
     next(new BadRequestError('Email или password не могут быть пустыми!'));
-  }
-  const regex = /https?:\/\/[\w\W]+/g;
-  if (regex.test(avatar)) {
-    next(new BadRequestError('Некоректная ссылка'));
   }
   return User.findOne({ email }).then((user) => {
     if (user) {
@@ -52,8 +48,19 @@ const createUser = (req, res, next) => {
           email,
           password: hash,
         }))
-        .then(() => res.status(201).send({ message: 'Регистрация прошла успешно' }))
-        .catch(next);
+        .then((response) => res.status(201).send({
+          name: response.name,
+          about: response.about,
+          avatar: response.avatar,
+          email: response.email,
+        }))
+        .catch((err) => {
+          if (err.name === 'ValidationError') {
+            next(new BadRequestError('Некорректные данные при создании карточки'));
+          } else {
+            next(err);
+          }
+        });
     }
   });
 };
@@ -72,7 +79,13 @@ const updateUser = (req, res, next) => {
       }
       res.send(user);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Некорректные данные при создании карточки'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const updateUserAvatar = (req, res, next) => {
@@ -89,7 +102,13 @@ const updateUserAvatar = (req, res, next) => {
       }
       res.send(user);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Некорректные данные при создании карточки'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports = {

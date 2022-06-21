@@ -21,20 +21,29 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-app.post('/signin', celebrate({
-  body: Joi.object().keys({
-    about: Joi.string().min(2).max(30),
-    avatar: Joi.string().pattern((/https?:\/\/[\w\W]+/)),
-    email: Joi.string().required().email(),
-    password: Joi.string().required(),
+app.post(
+  '/signin',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required(),
+    }),
   }),
-}), login);
-app.post('/signup', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required(),
+  login,
+);
+app.post(
+  '/signup',
+  celebrate({
+    body: Joi.object().keys({
+      name: Joi.string().min(2).max(30),
+      about: Joi.string().min(2).max(30),
+      avatar: Joi.string().pattern(/https?:\/\/[\w\W+]+[.]\w\w\w?/), // извините не смог разобраться с joi custom :-(
+      email: Joi.string().required().email(),
+      password: Joi.string().required(),
+    }),
   }),
-}), createUser);
+  createUser,
+);
 app.use(auth);
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);

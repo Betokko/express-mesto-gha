@@ -3,20 +3,16 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 const UnauthorizedError = require('../error-classes/UnauthorizedError');
-const NotFoundError = require('../error-classes/NotFoundError');
 
-const { PRIVATE_KEY } = process.env;
+const { PRIVATE_KEY = 'dev-secret' } = process.env;
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
-  if (!email || !password) {
-    next(new UnauthorizedError('Введен неверный email или password'));
-  }
   return User.findOne({ email })
     .select('+password')
     .then((user) => {
       if (!user) {
-        next(new NotFoundError('Пользователь с таким email не найден'));
+        next(new UnauthorizedError('Пользователь с таким email не найден'));
       } else {
         bcrypt.compare(password, user.password, (err, result) => {
           if (result) {

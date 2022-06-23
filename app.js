@@ -14,6 +14,7 @@ const { createUser } = require('./controllers/user');
 const { auth } = require('./middlewares/auth');
 const { errorHandler } = require('./middlewares/errorHandler');
 const NotFoundError = require('./error-classes/NotFoundError');
+const validateUrl = require('./utils/validators');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -37,7 +38,9 @@ app.post(
     body: Joi.object().keys({
       name: Joi.string().min(2).max(30),
       about: Joi.string().min(2).max(30),
-      avatar: Joi.string().pattern(/https?:\/\/[\w\W+]+[.]\w\w\w?/), // извините не смог разобраться с joi custom :-(
+      avatar: Joi.string()
+        .required()
+        .custom((link) => validateUrl(link)),
       email: Joi.string().required().email(),
       password: Joi.string().required(),
     }),

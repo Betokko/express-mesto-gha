@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 
+const validateUrl = require('../utils/validators');
+
 const {
   getCards,
   createCard,
@@ -16,9 +18,7 @@ router.post(
   celebrate({
     body: Joi.object().keys({
       name: Joi.string().required().min(2).max(30),
-      link: Joi.string()
-        .required()
-        .pattern(/https?:\/\/[\w\W+]+(gif|jpe?g|bmp|png|webp)$/),
+      link: Joi.string().required().custom((link) => validateUrl(link)),
     }),
   }),
   createCard,
@@ -44,6 +44,10 @@ router.put(
   addLikeOnCard,
 );
 
-router.delete('/:cardId/likes', removeLikeOnCard);
+router.delete('/:cardId/likes', celebrate({
+  params: Joi.object().keys({
+    cardId: Joi.string().length(24).hex().required(),
+  }),
+}), removeLikeOnCard);
 
 module.exports = router;

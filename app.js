@@ -15,12 +15,14 @@ const { auth } = require('./middlewares/auth');
 const { errorHandler } = require('./middlewares/errorHandler');
 const NotFoundError = require('./error-classes/NotFoundError');
 const validateUrl = require('./utils/validators');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { PORT = 3000 } = process.env;
 const app = express();
 
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(requestLogger);
 
 app.post(
   '/signin',
@@ -51,6 +53,7 @@ app.use('/cards', cardRouter);
 app.use('*', (req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
 });
+app.use(errorLogger);
 app.use(errors());
 app.use(errorHandler);
 
